@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dreamy Garden</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        width: 240px;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: #1a0a2e;
+        color: #fff;
+        padding: 20px 18px;
+        text-align: center;
+    }
+
+    .logo {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    h1 {
+        font-size: 1rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #FFB6C1, #DDA0F0, #A8EDEA);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 4px;
+    }
+
+    p {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 16px;
+        line-height: 1.4;
+    }
+
+    .play-btn {
+        display: block;
+        width: 100%;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 700;
+        padding: 10px 0;
+        border: none;
+        border-radius: 50px;
+        background: linear-gradient(135deg, #FFB6C1, #DDA0F0);
+        color: #2d0b5a;
+        cursor: pointer;
+        margin-bottom: 14px;
+        transition: opacity 0.15s;
+    }
+
+    .play-btn:hover { opacity: 0.85; }
+
+    .hint {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.25);
+        line-height: 1.5;
+    }
+
+    .divider {
+        border: none;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        margin: 12px 0;
+    }
+</style>
+</head>
+<body>
+    <span class="logo">🐛</span>
+    <h1>Dreamy Garden</h1>
+    <p>Fuzzy caterpillar · Psychedelic garden · Cozy vibes</p>
+
+    <button class="play-btn" id="play-btn">Open Game ✨</button>
+
+    <hr class="divider">
+
+    <p class="hint">
+        New tab shows the game automatically.<br>
+        Arrow keys / WASD &nbsp;·&nbsp; Space to pause
+    </p>
+
+    <script src="popup.js"></script>
+</body>
+</html>

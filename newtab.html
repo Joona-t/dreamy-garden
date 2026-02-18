@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamy Garden 🌸</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Animated background layers -->
+    <div class="bg-layer bg-layer-1" aria-hidden="true"></div>
+    <div class="bg-layer bg-layer-2" aria-hidden="true"></div>
+
+    <!-- Floating sparkles (CSS animated) -->
+    <div class="sparkle-field" aria-hidden="true">
+        <div class="sparkle s1">✦</div>
+        <div class="sparkle s2">✧</div>
+        <div class="sparkle s3">⋆</div>
+        <div class="sparkle s4">✦</div>
+        <div class="sparkle s5">✧</div>
+        <div class="sparkle s6">⋆</div>
+        <div class="sparkle s7">✦</div>
+        <div class="sparkle s8">✧</div>
+        <div class="sparkle s9">⋆</div>
+        <div class="sparkle s10">✦</div>
+        <div class="sparkle s11">✧</div>
+        <div class="sparkle s12">⋆</div>
+    </div>
+
+    <!-- Main game layout -->
+    <main class="game-root" role="main">
+        <!-- Header -->
+        <header class="game-header">
+            <h1 class="game-title">
+                <span class="title-bug" aria-hidden="true">🐛</span>
+                Dreamy Garden
+                <span class="title-flower" aria-hidden="true">🌸</span>
+            </h1>
+            <div class="score-strip" role="status" aria-live="polite">
+                <div class="score-box">
+                    <span class="score-label">Score</span>
+                    <span class="score-value" id="score">0</span>
+                </div>
+                <div class="score-box">
+                    <span class="score-label">Best</span>
+                    <span class="score-value" id="best-score">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Canvas wrapper -->
+        <div class="canvas-wrap">
+            <canvas
+                id="gameCanvas"
+                width="500"
+                height="500"
+                role="img"
+                aria-label="Dreamy Garden snake game canvas"
+            ></canvas>
+
+            <!-- Overlay screens (managed by JS) -->
+            <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+                <div class="overlay-card">
+                    <h2 id="overlay-title" class="overlay-title">🌸 Dreamy Garden 🌸</h2>
+                    <p id="overlay-msg" class="overlay-msg">Guide your fuzzy caterpillar through the dreamy garden and collect sparkles!</p>
+                    <p class="overlay-hint" aria-hidden="true">🐛 ··· 🌸 ··· ✨</p>
+                    <button id="action-btn" class="action-btn" aria-label="Start the game">
+                        Start Dreaming ✨
+                    </button>
+                    <p class="overlay-controls">Arrow Keys / WASD &nbsp;·&nbsp; Space to Pause</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer hint -->
+        <footer class="game-footer" aria-label="Controls">
+            <span>↑↓←→ / WASD move</span>
+            <span>·</span>
+            <span>Space pause</span>
+            <span>·</span>
+            <span>P pause</span>
+        </footer>
+    </main>
+
+    <script src="game.js"></script>
+</body>
+</html>

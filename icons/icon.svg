@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#2d0b5a"/>
+      <stop offset="100%" stop-color="#1a0a2e"/>
+    </radialGradient>
+    <radialGradient id="body" cx="35%" cy="30%" r="70%">
+      <stop offset="0%"   stop-color="#e8c0ff"/>
+      <stop offset="100%" stop-color="#DDA0F0"/>
+    </radialGradient>
+    <radialGradient id="seg1" cx="35%" cy="30%" r="70%">
+      <stop offset="0%"   stop-color="#ffd1dc"/>
+      <stop offset="100%" stop-color="#FFB6C1"/>
+    </radialGradient>
+    <radialGradient id="seg2" cx="35%" cy="30%" r="70%">
+      <stop offset="0%"   stop-color="#c8fef5"/>
+      <stop offset="100%" stop-color="#A8EDEA"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="62" fill="url(#bg)"/>
+
+  <!-- Caterpillar body segments (tail → head, left to right) -->
+  <g filter="url(#glow)">
+    <!-- Segment 3 (tail) -->
+    <circle cx="30" cy="72" r="14" fill="url(#seg2)" opacity="0.95"/>
+    <!-- Segment 2 -->
+    <circle cx="52" cy="68" r="15" fill="url(#seg1)" opacity="0.95"/>
+    <!-- Segment 1 -->
+    <circle cx="75" cy="65" r="16" fill="url(#body)" opacity="0.95"/>
+    <!-- Head -->
+    <circle cx="98" cy="62" r="18" fill="url(#seg1)"/>
+  </g>
+
+  <!-- Eyes -->
+  <circle cx="103" cy="56" r="4" fill="white"/>
+  <circle cx="104.2" cy="57.2" r="2" fill="#2d0b5a"/>
+  <circle cx="103.2" cy="55.8" r="0.9" fill="white"/>
+
+  <!-- Antenna -->
+  <path d="M100 46 Q105 38 102 30" stroke="rgba(255,255,255,0.7)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="102" cy="30" r="3" fill="#FFB6C1"/>
+
+  <!-- Sparkle (top-left) -->
+  <g transform="translate(22,22)" opacity="0.9">
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="#FFB6C1" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-7" y1="0" x2="7" y2="0" stroke="#FFB6C1" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-5" y1="-5" x2="5" y2="5" stroke="#FFB6C1" stroke-width="1" stroke-linecap="round"/>
+    <line x1="5" y1="-5" x2="-5" y2="5" stroke="#FFB6C1" stroke-width="1" stroke-linecap="round"/>
+  </g>
+
+  <!-- Sparkle (bottom-right) -->
+  <g transform="translate(105,100)" opacity="0.7">
+    <line x1="0" y1="-5" x2="0" y2="5" stroke="#A8EDEA" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-5" y1="0" x2="5" y2="0" stroke="#A8EDEA" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>

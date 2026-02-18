@@ -1,0 +1,340 @@
+/* =============================================
+   Dreamy Garden – Psychedelic Soft Snake Game
+   Pastel / Y2K / cozy-trippy aesthetic
+   ============================================= */
+
+/* --- Reset & Base -------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    user-select: none;
+}
+
+/* --- Animated gradient background --------------- */
+body {
+    background: #1a0a2e;   /* deep dreamy dark base */
+}
+
+.bg-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.bg-layer-1 {
+    background: linear-gradient(
+        135deg,
+        #2d0b5a 0%,
+        #1a1a6e 25%,
+        #0d3b6e 50%,
+        #1a4a3a 75%,
+        #2d0b5a 100%
+    );
+    background-size: 400% 400%;
+    animation: bgShift1 18s ease infinite;
+}
+
+.bg-layer-2 {
+    background: radial-gradient(
+        ellipse at 30% 60%,
+        rgba(255, 182, 193, 0.18) 0%,
+        transparent 55%
+    ),
+    radial-gradient(
+        ellipse at 75% 25%,
+        rgba(216, 180, 254, 0.18) 0%,
+        transparent 55%
+    ),
+    radial-gradient(
+        ellipse at 50% 95%,
+        rgba(167, 243, 208, 0.15) 0%,
+        transparent 55%
+    );
+    background-size: 300% 300%;
+    animation: bgShift2 22s ease-in-out infinite reverse;
+}
+
+@keyframes bgShift1 {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+@keyframes bgShift2 {
+    0%   { background-position: 0% 0%; }
+    33%  { background-position: 100% 50%; }
+    66%  { background-position: 50% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+/* --- Floating sparkles -------------------------- */
+.sparkle-field {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.sparkle {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 14px;
+    animation: floatSparkle linear infinite;
+    text-shadow: 0 0 8px currentColor;
+}
+
+/* Distribute sparkles across the screen */
+.s1  { left:  5%; font-size: 10px; animation-duration: 12s; animation-delay: 0s;    color: rgba(255,182,193,0.7); }
+.s2  { left: 12%; font-size: 16px; animation-duration: 15s; animation-delay: 2s;    color: rgba(216,180,254,0.7); }
+.s3  { left: 22%; font-size:  8px; animation-duration: 10s; animation-delay: 5s;    color: rgba(167,243,208,0.7); }
+.s4  { left: 35%; font-size: 14px; animation-duration: 14s; animation-delay: 1s;    color: rgba(255,182,193,0.7); }
+.s5  { left: 48%; font-size: 10px; animation-duration: 11s; animation-delay: 7s;    color: rgba(186,230,253,0.7); }
+.s6  { left: 58%; font-size: 18px; animation-duration: 16s; animation-delay: 3s;    color: rgba(254,205,168,0.7); }
+.s7  { left: 68%; font-size:  9px; animation-duration: 13s; animation-delay: 4s;    color: rgba(216,180,254,0.7); }
+.s8  { left: 75%; font-size: 15px; animation-duration: 17s; animation-delay: 6s;    color: rgba(255,182,193,0.7); }
+.s9  { left: 82%; font-size: 12px; animation-duration:  9s; animation-delay: 0.5s;  color: rgba(167,243,208,0.7); }
+.s10 { left: 88%; font-size:  8px; animation-duration: 18s; animation-delay: 8s;    color: rgba(186,230,253,0.7); }
+.s11 { left: 93%; font-size: 16px; animation-duration: 12s; animation-delay: 2.5s;  color: rgba(254,205,168,0.7); }
+.s12 { left: 96%; font-size: 10px; animation-duration: 14s; animation-delay: 9s;    color: rgba(216,180,254,0.7); }
+
+@keyframes floatSparkle {
+    0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+}
+
+/* --- Layout -------------------------------------- */
+.game-root {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 12px;
+    padding: 12px;
+}
+
+/* --- Header -------------------------------------- */
+.game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 500px;
+    max-width: 100%;
+}
+
+.game-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: linear-gradient(135deg, #FFB6C1, #DDA0F0, #A8EDEA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 0 10px rgba(255,182,193,0.5));
+    animation: titlePulse 4s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(255,182,193,0.4)); }
+    50%       { filter: drop-shadow(0 0 18px rgba(216,180,254,0.7)); }
+}
+
+.title-bug, .title-flower {
+    display: inline-block;
+    animation: wiggle 3s ease-in-out infinite;
+}
+.title-flower { animation-delay: 1.5s; }
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(-8deg) scale(1); }
+    50%       { transform: rotate(8deg) scale(1.15); }
+}
+
+.score-strip {
+    display: flex;
+    gap: 10px;
+}
+
+.score-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 5px 14px;
+    backdrop-filter: blur(6px);
+    min-width: 58px;
+}
+
+.score-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.score-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #FFB6C1;
+    text-shadow: 0 0 12px rgba(255,182,193,0.6);
+    line-height: 1;
+    margin-top: 2px;
+}
+
+/* --- Canvas wrapper ----------------------------- */
+.canvas-wrap {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 2px rgba(255, 182, 193, 0.2),
+        0 0 40px rgba(216, 180, 254, 0.25),
+        0 0 80px rgba(167, 243, 208, 0.1);
+    animation: canvasGlow 6s ease-in-out infinite;
+}
+
+@keyframes canvasGlow {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(255,182,193,0.2), 0 0 40px rgba(216,180,254,0.25), 0 0 80px rgba(167,243,208,0.1); }
+    33%       { box-shadow: 0 0 0 2px rgba(216,180,254,0.3), 0 0 50px rgba(167,243,208,0.3),  0 0 90px rgba(255,182,193,0.12); }
+    66%       { box-shadow: 0 0 0 2px rgba(167,243,208,0.25),0 0 45px rgba(255,182,193,0.25), 0 0 85px rgba(216,180,254,0.12); }
+}
+
+#gameCanvas {
+    display: block;
+    width: 500px;
+    height: 500px;
+    /* background is drawn via JS, canvas itself transparent */
+}
+
+/* --- Overlay ------------------------------------- */
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(12px);
+    background: rgba(26, 10, 46, 0.6);
+    border-radius: 20px;
+    transition: opacity 0.4s ease;
+    z-index: 10;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.overlay-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 40px 32px;
+    text-align: center;
+}
+
+.overlay-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #FFB6C1 0%, #DDA0F0 50%, #A8EDEA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 12px rgba(255,182,193,0.5));
+    line-height: 1.1;
+}
+
+.overlay-msg {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.75);
+    max-width: 300px;
+    line-height: 1.5;
+}
+
+.overlay-hint {
+    font-size: 1.4rem;
+    letter-spacing: 0.3em;
+    animation: hintPulse 2s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+    0%, 100% { opacity: 0.5; }
+    50%       { opacity: 1; }
+}
+
+.action-btn {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #FFB6C1, #DDA0F0);
+    color: #2d0b5a;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255,182,193,0.4), 0 0 0 0 rgba(255,182,193,0.5);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    animation: btnBreath 3s ease-in-out infinite;
+}
+
+@keyframes btnBreath {
+    0%, 100% { box-shadow: 0 4px 20px rgba(255,182,193,0.4), 0 0 0 0 rgba(255,182,193,0.3); }
+    50%       { box-shadow: 0 4px 30px rgba(216,180,254,0.5), 0 0 0 8px rgba(255,182,193,0); }
+}
+
+.action-btn:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,182,193,0.5); }
+.action-btn:active { transform: scale(0.97); }
+.action-btn:focus-visible { outline: 3px solid #FFB6C1; outline-offset: 3px; }
+
+.overlay-controls {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 0.05em;
+}
+
+/* --- Footer ------------------------------------- */
+.game-footer {
+    display: flex;
+    gap: 10px;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.05em;
+}
+
+/* --- Screen shake (death) ----------------------- */
+@keyframes shake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    15%  { transform: translate(-6px,  4px) rotate(-1deg); }
+    30%  { transform: translate( 6px, -4px) rotate( 1deg); }
+    45%  { transform: translate(-4px,  6px) rotate(-0.5deg); }
+    60%  { transform: translate( 4px, -6px) rotate( 0.5deg); }
+    75%  { transform: translate(-2px,  2px) rotate(-0.3deg); }
+}
+
+.canvas-wrap.shaking {
+    animation: shake 0.45s ease, canvasGlow 6s ease-in-out infinite;
+}
+
+/* --- Reduced motion ------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+    .bg-layer-1, .bg-layer-2,
+    .sparkle, .game-title,
+    .title-bug, .title-flower,
+    .overlay-hint, .action-btn,
+    .canvas-wrap {
+        animation: none !important;
+    }
+    .sparkle { opacity: 0.3; }
+}
