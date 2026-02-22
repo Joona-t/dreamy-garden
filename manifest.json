@@ -21,9 +21,6 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": [
-    "storage"
-  ],
   "browser_specific_settings": {
     "gecko": {
       "id": "dreamy-garden@lovespark",

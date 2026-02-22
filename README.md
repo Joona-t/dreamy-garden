@@ -120,7 +120,7 @@ Each segment is rendered as:
 
 ## 🔒 Permissions
 
-- **`storage`** — used only to persist your high score locally via `chrome.storage` (currently falls back to `localStorage`)
+No special permissions required. High scores are saved locally using `localStorage`.
 
 No data is sent anywhere. Everything stays on your device.
 
