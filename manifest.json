@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Dreamy Garden 🐛",
+  "name": "__MSG_extName__",
   "short_name": "Dreamy Garden",
   "version": "1.0.0",
-  "description": "🌸 A psychedelic fuzzy caterpillar Snake game with cozy dreamy vibes. Your new favorite new tab! 🐛✨",
+  "description": "__MSG_extDescription__",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
@@ -30,5 +30,6 @@
         "justification": "This extension does not collect, transmit, or store any user data."
       }
     }
-  }
+  },
+  "default_locale": "en"
 }
