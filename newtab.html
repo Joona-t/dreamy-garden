@@ -82,6 +82,17 @@
         </footer>
     </main>
 
-    <script src="game.js"></script>
+    <!-- Paused screen (shown when game is disabled on new tab) -->
+    <div id="paused-screen" class="paused-screen" style="display:none">
+        <div class="paused-card">
+            <span class="paused-icon">🐛</span>
+            <h1 class="paused-title">Dreamy Garden</h1>
+            <p class="paused-msg">Game is taking a nap 🌙</p>
+            <button id="enable-btn" class="action-btn">Wake Up & Play ✨</button>
+            <p class="paused-hint">Toggle the game on from the toolbar icon,<br>or click the button above!</p>
+        </div>
+    </div>
+
+    <script src="newtab-gate.js"></script>
 </body>
 </html>

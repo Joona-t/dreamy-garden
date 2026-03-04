@@ -24,7 +24,11 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "dreamy-garden@lovespark",
-      "strict_min_version": "109.0"
+      "strict_min_version": "109.0",
+      "data_collection_permissions": {
+        "is_exempt": true,
+        "justification": "This extension does not collect, transmit, or store any user data."
+      }
     }
   }
 }

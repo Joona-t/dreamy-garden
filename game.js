@@ -45,6 +45,20 @@ const MUSHROOMS = [
 
 const SPARK_COLS = ['#f9a8d4','#c084fc','#86efac','#7dd3fc','#fbcfe8','#ffffff'];
 
+// ─── Power-Up Definitions ───────────────────────────────────────────────────
+
+const POWERUP_TYPES = [
+    { id: 'speed', label: 'SPEED', icon: '⚡', duration: 6000, color: '#facc15', glow: '#fde68a' },
+    { id: 'ghost', label: 'GHOST', icon: '👻', duration: 7000, color: '#a78bfa', glow: '#c4b5fd' },
+    { id: 'wrap',  label: 'WRAP',  icon: '🌀', duration: 8000, color: '#34d399', glow: '#6ee7b7' },
+];
+
+const POWERUP_SPAWN_INTERVAL = 8000;   // ms between spawn attempts
+const POWERUP_SPAWN_CHANCE   = 0.6;    // 60% chance each attempt
+const POWERUP_DESPAWN_MS     = 10000;  // disappear after 10s if uneaten
+const SPEED_MULTIPLIER       = 0.6;    // 60% of MOVE_MS when speed-boosted
+const POWERUP_RAINBOW = ['#f9a8d4','#c084fc','#facc15','#34d399','#7dd3fc','#fb923c'];
+
 // ─── State ──────────────────────────────────────────────────────────────────
 
 const gs = {
@@ -60,6 +74,11 @@ const gs = {
     particles:   [],
     floatTexts:  [],
     dirLocked:   false,
+    // Power-ups
+    powerup:        null,   // on-board: {x, y, type, spawnedAt}
+    activePowers:   [],     // active: [{type, expiresAt}]
+    lastPowerSpawn: 0,
+    speedMultiplier: 1,
 };
 
 // ─── DOM ────────────────────────────────────────────────────────────────────
@@ -153,7 +172,9 @@ function drawParticles() {
 
 // ─── Floating "+1" text ──────────────────────────────────────────────────────
 
-function spawnFloat(cx, cy) { gs.floatTexts.push({x:cx, y:cy, life:1}); }
+function spawnFloat(cx, cy, text = '+1', color = '#f9a8d4') {
+    gs.floatTexts.push({x:cx, y:cy, life:1, text, color});
+}
 
 function updateFloats() {
     for (let i = gs.floatTexts.length-1; i >= 0; i--) {
@@ -167,8 +188,8 @@ function drawFloats() {
     ctx.textAlign = 'center';
     for (const t of gs.floatTexts) {
         ctx.globalAlpha = t.life;
-        ctx.fillStyle = '#f9a8d4';
-        ctx.fillText('+1', t.x, t.y);
+        ctx.fillStyle = t.color || '#f9a8d4';
+        ctx.fillText(t.text || '+1', t.x, t.y);
     }
     ctx.globalAlpha = 1;
 }
@@ -256,6 +277,109 @@ function drawMushroom(cx, cy, mushIdx, frame) {
     ctx.restore();
 }
 
+// ─── Power-Up Mushroom (trippy glow) ─────────────────────────────────────────
+
+function drawPowerupMushroom(cx, cy, typeIdx, frame, ts) {
+    const def   = POWERUP_TYPES[typeIdx];
+    const sc    = CELL * 0.46;
+    const pulse = 1 + 0.14 * Math.sin(frame * 0.12);
+    const age   = gs.powerup ? ts - gs.powerup.spawnedAt : 0;
+
+    // Blink when about to despawn (last 3 seconds)
+    const timeLeft = POWERUP_DESPAWN_MS - age;
+    if (timeLeft < 3000 && Math.floor(frame / 6) % 2 === 0) return;
+
+    ctx.save();
+    ctx.translate(cx, cy + sc * 0.25);
+    ctx.scale(pulse, pulse);
+
+    // Outer glow rings
+    const ringPhase = frame * 0.08;
+    for (let r = 3; r >= 1; r--) {
+        const ringR = sc * (1.2 + r * 0.5) + Math.sin(ringPhase + r) * 4;
+        const alpha = 0.08 + 0.04 * Math.sin(ringPhase + r * 2);
+        ctx.beginPath();
+        ctx.arc(0, -sc * 0.3, ringR, 0, Math.PI * 2);
+        ctx.fillStyle = rgba(def.glow, alpha);
+        ctx.fill();
+    }
+
+    // Stem
+    ctx.fillStyle = '#f5ead7';
+    ctx.beginPath();
+    ctx.roundRect(-sc * 0.28, -sc * 0.05, sc * 0.56, sc * 0.75, sc * 0.18);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.beginPath();
+    ctx.roundRect(-sc * 0.1, sc * 0.02, sc * 0.1, sc * 0.5, sc * 0.05);
+    ctx.fill();
+
+    // Cap underside
+    ctx.fillStyle = rgba(def.color, 0.7);
+    ctx.beginPath();
+    ctx.ellipse(0, -sc * 0.05, sc * 0.98, sc * 0.22, 0, 0, Math.PI);
+    ctx.fill();
+
+    // Cap dome with rainbow-shifting gradient
+    const rainbowIdx = Math.floor(frame * 0.06) % POWERUP_RAINBOW.length;
+    const blend = 0.5 + 0.5 * Math.sin(frame * 0.06);
+
+    ctx.shadowColor = def.glow;
+    ctx.shadowBlur  = 18 + 6 * Math.sin(frame * 0.1);
+
+    const capGrad = ctx.createLinearGradient(-sc, -sc * 1.2, sc, -sc * 0.2);
+    capGrad.addColorStop(0, def.color);
+    capGrad.addColorStop(blend, POWERUP_RAINBOW[rainbowIdx]);
+    capGrad.addColorStop(1, def.glow);
+    ctx.fillStyle = capGrad;
+    ctx.beginPath();
+    ctx.moveTo(-sc, -sc * 0.05);
+    ctx.bezierCurveTo(-sc, -sc * 1.55, sc, -sc * 1.55, sc, -sc * 0.05);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Cap highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(-sc * 0.18, -sc * 0.82, sc * 0.38, sc * 0.22, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pulsing sparkle spots
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    const spots = [[0, -0.72], [-0.48, -0.42], [0.48, -0.42]];
+    for (const [sx, sy] of spots) {
+        const spotAlpha = 0.7 + 0.3 * Math.sin(frame * 0.15 + sx * 5);
+        ctx.globalAlpha = spotAlpha;
+        ctx.beginPath();
+        ctx.arc(sx * sc, sy * sc, sc * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+
+    // Orbiting particles (world space)
+    for (let i = 0; i < 4; i++) {
+        const angle = frame * 0.04 + i * (Math.PI / 2);
+        const orbitR = sc * 1.8;
+        const px = cx + Math.cos(angle) * orbitR;
+        const py = (cy + sc * 0.25 - sc * 0.3) + Math.sin(angle) * orbitR * 0.6;
+        const sparkAlpha = 0.5 + 0.3 * Math.sin(frame * 0.1 + i);
+        ctx.beginPath();
+        ctx.arc(px, py, 2, 0, Math.PI * 2);
+        ctx.fillStyle = rgba(POWERUP_RAINBOW[(i + rainbowIdx) % POWERUP_RAINBOW.length], sparkAlpha);
+        ctx.fill();
+    }
+
+    // Power-up type icon floating above
+    ctx.font = '12px system-ui';
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = 0.6 + 0.3 * Math.sin(frame * 0.08);
+    ctx.fillText(def.icon, cx, cy - sc * 1.6);
+    ctx.globalAlpha = 1;
+}
+
 // ─── Caterpillar ─────────────────────────────────────────────────────────────
 
 /**
@@ -301,7 +425,15 @@ function drawSegment(cx, cy, color, isHead, dirIdx) {
     }
 
     // ── Main body circle (one shadowBlur only on head) ──
-    if (isHead) { ctx.shadowColor = color; ctx.shadowBlur = 16; }
+    if (isHead) {
+        if (gs.activePowers.length > 0) {
+            ctx.shadowColor = POWERUP_TYPES[gs.activePowers[0].type].glow;
+            ctx.shadowBlur = 24;
+        } else {
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 16;
+        }
+    }
 
     const grad = ctx.createRadialGradient(cx-r*0.32, cy-r*0.32, r*0.08, cx, cy, r);
     grad.addColorStop(0, lighten(color, 0.55));
@@ -433,6 +565,28 @@ function drawSnake(progress) {
         lerp(s.py, s.y, progress) * CELL + CELL/2,
     ]);
 
+    // Power-up visual modifiers
+    const isGhost = hasPower('ghost');
+    const isSpeed = hasPower('speed');
+    const isWrap  = hasPower('wrap');
+
+    // Ghost: semi-transparent snake
+    if (isGhost) ctx.globalAlpha = 0.55;
+
+    // Speed: golden afterimage halo
+    if (isSpeed) {
+        const prevAlpha = ctx.globalAlpha;
+        ctx.globalAlpha = 0.15;
+        for (let i = snake.length - 1; i >= 0; i--) {
+            const r = i === 0 ? CELL * 0.48 : CELL * 0.42;
+            ctx.beginPath();
+            ctx.arc(pos[i][0], pos[i][1], r + 4, 0, Math.PI * 2);
+            ctx.fillStyle = rgba('#facc15', 0.2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = prevAlpha;
+    }
+
     // 1. Connections (behind everything)
     drawConnections(pos);
 
@@ -441,6 +595,21 @@ function drawSnake(progress) {
         const col = SEG_COLS[i % SEG_COLS.length];
         drawSegment(pos[i][0], pos[i][1], col, i === 0, dirIdx);
     }
+
+    // Wrap: green pulsing ring on each segment
+    if (isWrap) {
+        const ringAlpha = 0.25 + 0.15 * Math.sin(gs.frame * 0.1);
+        for (let i = 0; i < pos.length; i++) {
+            const r = i === 0 ? CELL * 0.48 : CELL * 0.42;
+            ctx.beginPath();
+            ctx.arc(pos[i][0], pos[i][1], r + 3, 0, Math.PI * 2);
+            ctx.strokeStyle = rgba('#34d399', ringAlpha);
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+    }
+
+    ctx.globalAlpha = 1;
 }
 
 // ─── Game Logic ──────────────────────────────────────────────────────────────
@@ -451,6 +620,88 @@ function placeFood() {
     do { x = rndInt(GRID); y = rndInt(GRID); }
     while (occ.has(`${x},${y}`));
     gs.food = { x, y, mush: rndInt(MUSHROOMS.length) };
+}
+
+// ─── Power-Up Logic ─────────────────────────────────────────────────────────
+
+function hasPower(id) {
+    return gs.activePowers.some(p => POWERUP_TYPES[p.type].id === id);
+}
+
+function recalcSpeedMultiplier() {
+    gs.speedMultiplier = hasPower('speed') ? SPEED_MULTIPLIER : 1;
+}
+
+function trySpawnPowerup(ts) {
+    if (gs.powerup) return;
+    if (ts - gs.lastPowerSpawn < POWERUP_SPAWN_INTERVAL) return;
+    gs.lastPowerSpawn = ts;
+    if (Math.random() > POWERUP_SPAWN_CHANCE) return;
+    if (gs.score < 3) return;
+
+    const occ = new Set(gs.snake.map(s => `${s.x},${s.y}`));
+    occ.add(`${gs.food.x},${gs.food.y}`);
+    let x, y, attempts = 0;
+    do { x = rndInt(GRID); y = rndInt(GRID); attempts++; }
+    while (occ.has(`${x},${y}`) && attempts < 80);
+    if (attempts >= 80) return;
+
+    gs.powerup = { x, y, type: rndInt(POWERUP_TYPES.length), spawnedAt: ts };
+}
+
+function updatePowerup(ts) {
+    if (gs.powerup && ts - gs.powerup.spawnedAt > POWERUP_DESPAWN_MS) {
+        const cx = gs.powerup.x * CELL + CELL / 2;
+        const cy = gs.powerup.y * CELL + CELL / 2;
+        spawnBurst(cx, cy, 8);
+        gs.powerup = null;
+    }
+}
+
+function updateActivePowers(ts) {
+    let changed = false;
+    for (let i = gs.activePowers.length - 1; i >= 0; i--) {
+        if (ts >= gs.activePowers[i].expiresAt) {
+            gs.activePowers.splice(i, 1);
+            changed = true;
+        }
+    }
+    if (changed) recalcSpeedMultiplier();
+}
+
+function collectPowerup(ts) {
+    const pu = gs.powerup;
+    const def = POWERUP_TYPES[pu.type];
+    const cx = pu.x * CELL + CELL / 2;
+    const cy = pu.y * CELL + CELL / 2;
+
+    // Rainbow burst
+    for (let i = 0; i < 24; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = 2 + Math.random() * 3;
+        gs.particles.push({
+            x: cx, y: cy,
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd,
+            size: 2.5 + Math.random() * 3,
+            color: POWERUP_RAINBOW[rndInt(POWERUP_RAINBOW.length)],
+            life: 1,
+            decay: 0.018 + Math.random() * 0.012,
+        });
+    }
+
+    spawnFloat(cx, cy - CELL, def.icon + ' ' + def.label, def.color);
+
+    // Refresh timer if same type already active, else add
+    const existing = gs.activePowers.find(p => p.type === pu.type);
+    if (existing) {
+        existing.expiresAt = ts + def.duration;
+    } else {
+        gs.activePowers.push({ type: pu.type, expiresAt: ts + def.duration });
+    }
+
+    recalcSpeedMultiplier();
+    gs.powerup = null;
 }
 
 function buildSnake() {
@@ -481,15 +732,24 @@ function tick() {
     for (const s of snake) { s.px = s.x; s.py = s.y; }
 
     // 2. Compute new head position
-    const nhx = snake[0].x + nextDir.x;
-    const nhy = snake[0].y + nextDir.y;
+    let nhx = snake[0].x + nextDir.x;
+    let nhy = snake[0].y + nextDir.y;
 
-    // 3. Collision: walls
-    if (nhx < 0 || nhx >= GRID || nhy < 0 || nhy >= GRID) { die(); return; }
+    // 3. Collision: walls (wrap if powered)
+    if (nhx < 0 || nhx >= GRID || nhy < 0 || nhy >= GRID) {
+        if (hasPower('wrap')) {
+            nhx = ((nhx % GRID) + GRID) % GRID;
+            nhy = ((nhy % GRID) + GRID) % GRID;
+        } else {
+            die(); return;
+        }
+    }
 
-    // 4. Collision: self (skip last tail — it will cascade away)
-    for (let i = 0; i < snake.length - 1; i++) {
-        if (snake[i].x === nhx && snake[i].y === nhy) { die(); return; }
+    // 4. Collision: self (skip if ghost mode, skip last tail — it cascades)
+    if (!hasPower('ghost')) {
+        for (let i = 0; i < snake.length - 1; i++) {
+            if (snake[i].x === nhx && snake[i].y === nhy) { die(); return; }
+        }
     }
 
     // 5. Check food before cascading
@@ -502,6 +762,10 @@ function tick() {
     }
     snake[0].x = nhx;
     snake[0].y = nhy;
+
+    // Fix interpolation for wall wrap (prevent lerp streak across board)
+    if (Math.abs(snake[0].x - snake[0].px) > 1) snake[0].px = snake[0].x;
+    if (Math.abs(snake[0].y - snake[0].py) > 1) snake[0].py = snake[0].y;
 
     // 7. Eat food → grow + score
     if (ate) {
@@ -523,10 +787,18 @@ function tick() {
 
         placeFood();
     }
+
+    // 8. Check power-up collection
+    if (gs.powerup && snake[0].x === gs.powerup.x && snake[0].y === gs.powerup.y) {
+        collectPowerup(performance.now());
+    }
 }
 
 function die() {
     gs.phase = 'dead';
+    gs.activePowers    = [];
+    gs.speedMultiplier = 1;
+    gs.powerup         = null;
     const head = gs.snake[0];
     spawnBurst(head.x*CELL+CELL/2, head.y*CELL+CELL/2, 35);
 
@@ -553,6 +825,10 @@ function startGame() {
     gs.floatTexts = [];
     gs.dirLocked  = false;
     gs.lastTick   = performance.now();
+    gs.powerup        = null;
+    gs.activePowers   = [];
+    gs.lastPowerSpawn = 0;
+    gs.speedMultiplier = 1;
     elScore.textContent = '0';
     placeFood();
 }
@@ -609,20 +885,81 @@ elBtn.addEventListener('click', () => {
     } else { startGame(); }
 });
 
+// ─── Power-Up HUD ───────────────────────────────────────────────────────────
+
+function drawPowerupHUD(ts) {
+    if (gs.activePowers.length === 0) return;
+
+    const barW = 60;
+    const barH = 6;
+    const rowH = 22;
+    const startX = 8;
+    const startY = 8;
+
+    for (let i = 0; i < gs.activePowers.length; i++) {
+        const pw = gs.activePowers[i];
+        const def = POWERUP_TYPES[pw.type];
+        const remaining = Math.max(0, pw.expiresAt - ts);
+        const fraction = remaining / def.duration;
+        const y = startY + i * (rowH + 4);
+
+        // Background pill
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.beginPath();
+        ctx.roundRect(startX, y, barW + 34, rowH, 6);
+        ctx.fill();
+
+        // Icon
+        ctx.font = '12px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = def.color;
+        ctx.fillText(def.icon, startX + 4, y + 15);
+
+        // Label
+        ctx.font = 'bold 9px system-ui';
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.fillText(def.label, startX + 20, y + 14);
+
+        // Timer bar background
+        const bx = startX + 20;
+        const by = y + rowH - barH - 2;
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.beginPath();
+        ctx.roundRect(bx, by, barW, barH, 3);
+        ctx.fill();
+
+        // Timer bar fill (flashes when low)
+        let barAlpha = 1;
+        if (fraction < 0.25) barAlpha = 0.5 + 0.5 * Math.sin(gs.frame * 0.3);
+        ctx.fillStyle = rgba(def.color, 0.8 * barAlpha);
+        ctx.beginPath();
+        ctx.roundRect(bx, by, barW * fraction, barH, 3);
+        ctx.fill();
+    }
+}
+
 // ─── Game Loop ───────────────────────────────────────────────────────────────
 
 function gameLoop(ts) {
     gs.frame++;
 
-    // Discrete movement tick
-    if (gs.phase === 'playing' && ts - gs.lastTick >= MOVE_MS) {
+    // Power-up lifecycle
+    if (gs.phase === 'playing') {
+        trySpawnPowerup(ts);
+        updatePowerup(ts);
+        updateActivePowers(ts);
+    }
+
+    // Discrete movement tick (speed-multiplier aware)
+    const effMS = MOVE_MS * gs.speedMultiplier;
+    if (gs.phase === 'playing' && ts - gs.lastTick >= effMS) {
         gs.lastTick = ts;
         tick();
     }
 
     // Smooth interpolation factor (0→1 between ticks)
     const progress = gs.phase === 'playing'
-        ? Math.min(1, (ts - gs.lastTick) / MOVE_MS)
+        ? Math.min(1, (ts - gs.lastTick) / effMS)
         : 1;
 
     updateParticles();
@@ -636,8 +973,15 @@ function gameLoop(ts) {
     const f = gs.food;
     drawMushroom(f.x*CELL+CELL/2, f.y*CELL+CELL/2, f.mush, gs.frame);
 
+    // Power-up mushroom
+    if (gs.powerup) {
+        const pu = gs.powerup;
+        drawPowerupMushroom(pu.x*CELL+CELL/2, pu.y*CELL+CELL/2, pu.type, gs.frame, ts);
+    }
+
     if (gs.snake.length) drawSnake(progress);
     drawFloats();
+    drawPowerupHUD(ts);
 
     requestAnimationFrame(gameLoop);
 }

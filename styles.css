@@ -327,13 +327,70 @@ body {
     animation: shake 0.45s ease, canvasGlow 6s ease-in-out infinite;
 }
 
+/* --- Paused screen (game disabled on new tab) ---- */
+.paused-screen {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.paused-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 48px 40px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    backdrop-filter: blur(12px);
+}
+
+.paused-icon {
+    font-size: 4rem;
+    line-height: 1;
+    animation: pausedWiggle 3s ease-in-out infinite;
+}
+
+@keyframes pausedWiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-8deg); }
+    75%      { transform: rotate(8deg); }
+}
+
+.paused-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #FFB6C1, #DDA0F0, #A8EDEA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(255, 182, 193, 0.5));
+}
+
+.paused-msg {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.paused-hint {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.3);
+    line-height: 1.6;
+}
+
 /* --- Reduced motion ------------------------------ */
 @media (prefers-reduced-motion: reduce) {
     .bg-layer-1, .bg-layer-2,
     .sparkle, .game-title,
     .title-bug, .title-flower,
     .overlay-hint, .action-btn,
-    .canvas-wrap {
+    .canvas-wrap,
+    .paused-icon {
         animation: none !important;
     }
     .sparkle { opacity: 0.3; }
