@@ -62,3 +62,6 @@ function setToggleUI(enabled) {
     toggle.classList.toggle('active', enabled);
     toggle.setAttribute('aria-checked', String(enabled));
 }
+
+/* ── Author / Ko-fi Footer ── */
+document.body.insertAdjacentHTML('beforeend', LoveSparkFooter.render());

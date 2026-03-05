@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "short_name": "Dreamy Garden",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "__MSG_extDescription__",
   "permissions": [
     "storage"
@@ -11,7 +11,7 @@
     "newtab": "newtab.html"
   },
   "action": {
-    "default_title": "Dreamy Garden 🌸",
+    "default_title": "Dreamy Garden \ud83c\udf38",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
