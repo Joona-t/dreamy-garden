@@ -2,9 +2,11 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "short_name": "Dreamy Garden",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "__MSG_extDescription__",
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
