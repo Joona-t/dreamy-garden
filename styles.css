@@ -270,8 +270,8 @@ body {
 }
 
 @keyframes hintPulse {
-    0%, 100% { opacity: 0.5; }
-    50%       { opacity: 1; }
+    0%, 100% { transform: scale(0.95); }
+    50%       { transform: scale(1); }
 }
 
 .action-btn {
@@ -393,5 +393,5 @@ body {
     .paused-icon {
         animation: none !important;
     }
-    .sparkle { opacity: 0.3; }
+    .sparkle { visibility: hidden; }
 }

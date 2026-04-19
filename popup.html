@@ -3,17 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <title>Dreamy Garden</title>
+<link rel="stylesheet" href="lib/lovespark-base.css">
+<link rel="stylesheet" href="lib/lovespark-tokens.css">
 <link rel="stylesheet" href="lib/lovespark-fonts.css">
 <link rel="stylesheet" href="popup.css">
-  <link rel="stylesheet" href="lib/lovespark-footer.css">
+<link rel="stylesheet" href="lib/lovespark-footer.css">
 </head>
-<body>
+<body role="dialog" aria-labelledby="popup-title">
     <span class="logo">🐛</span>
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;position:relative">
-      <h1>Dreamy Garden</h1>
+      <h1 id="popup-title">Dreamy Garden</h1>
       <div class="theme-dropdown" id="themeDropdown">
-      <button class="theme-dropdown-trigger" id="themeToggle">
-        <span id="themeLabel">Retro Pink</span> ▾
+      <button class="theme-dropdown-trigger" id="themeToggle" aria-expanded="false" aria-haspopup="true">
+        <span id="themeLabel" aria-live="polite">Retro Pink</span> ▾
       </button>
       <div class="theme-dropdown-menu" id="themeMenu">
         <div class="theme-dropdown-header">Change Theme</div>
@@ -41,6 +43,12 @@
         Arrow keys / WASD &nbsp;·&nbsp; Space to pause
     </p>
 
+    <script src="lib/browser-polyfill.min.js"></script>
+    <script src="lib/lovespark-lifecycle.js"></script>
+    <script src="lib/lovespark-theme.js"></script>
+    <script src="lib/lovespark-stats.js"></script>
+    <script src="lib/lovespark-badge.js"></script>
+    <script src="lib/lovespark-popup.js"></script>
     <script src="lib/lovespark-footer.js"></script>
 <script src="popup.js"></script>
 </body>
